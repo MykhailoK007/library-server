@@ -1,0 +1,31 @@
+name: Create a branch by issue
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  creatingBranch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: "actions/checkout@v2"
+            
+      - name: Create branch
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          ISSUE_TITLE=${{ github.event.issue.title }}
+          LOWER_TITLE=$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]')
+          if [[ "$LOWER_TITLE" == *fix* ]]; then
+              BRANCH_NAME="fix-issue-${ISSUE_NUMBER}"
+          elif [[ "$LOWER_TITLE" == *feature* ]]; then
+              BRANCH_NAME="feature-issue-${ISSUE_NUMBER}"
+          else
+              BRANCH_NAME="issue-${ISSUE_NUMBER}"
+          fi
+          git checkout -b "$BRANCH_NAME"
+          git push origin "$BRANCH_NAME"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
