@@ -21,7 +21,7 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     'no-console': 'warn',
-    "indent": ["error", 2],
+    "indent": ["error", 2, { ignoredNodes: ["PropertyDefinition"] }],
     'max-lines': ['warn', { max: 300, skipComments: true, skipBlankLines: true }],
     'padding-line-between-statements': [
       'error',

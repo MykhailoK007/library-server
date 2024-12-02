@@ -9,27 +9,23 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('books')
 export class BooksController {
   constructor(private booksService: BooksService) {}
   @Get()
-  findAll(): Book[] {
-    // TODO: implement filter
-    return this.booksService.getAllBooks();
+  async findAll(): Promise<Book[]> {
+    return await this.booksService.getAllBooks();
   }
 
   @Post()
-  createBook(
-    // TODO: Apply DTO here
-    @Body('title') title: string,
-    @Body('description') description: string,
-    @Body('author') author: string,
-  ): Book {
-    return this.booksService.createBook(title, description, author);
+  createBook(@Body() createBook: CreateBookDto): Promise<Book> {
+    return this.booksService.createBook(createBook);
   }
   @Get('/:id')
-  getBookById(@Param('id') id: string): Book {
+  getBookById(@Param('id') id: string): Promise<Book> {
     return this.booksService.getBookById(id);
   }
   @Delete('/:id')
@@ -37,7 +33,7 @@ export class BooksController {
     return this.booksService.deleteBook(id);
   }
   @Put('/:id')
-  updateBook(@Param('id') id: string, @Body('book') book: Partial<Book>) {
+  updateBook(@Param('id') id: string, @Body() book: UpdateBookDto) {
     return this.booksService.updateBook(id, book);
   }
 }

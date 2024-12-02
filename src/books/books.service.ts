@@ -1,41 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { CreateBookDto } from './dto/create-book.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Book } from './books.model';
-import { v4 } from 'uuid';
+import { UpdateBookDto } from './dto/update-book.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class BooksService {
-  books: Book[] = [];
-  getAllBooks(): Book[] {
-    return this.books;
-  }
-  createBook(title: string, description: string, author: string): Book {
-    const book: Book = {
-      title,
-      description,
-      id: v4(),
-      author,
-    };
+  constructor(private prisma: PrismaService) {}
+  async getAllBooks(): Promise<Book[]> {
+    const books = await this.prisma.book.findMany();
 
-    this.books.push(book);
+    return books;
+  }
+  async createBook(book: CreateBookDto): Promise<Book> {
+    const createdBook = await this.prisma.book.create({ data: { ...book } });
+
+    return createdBook;
+  }
+  async getBookById(id: string): Promise<Book> {
+    const book = await this.prisma.book.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!book) {
+      throw new NotFoundException(`Book with Id: ${id} not found`);
+    }
 
     return book;
   }
-  getBookById(id: string): Book {
-    return this.books.find((book) => book.id === id);
-  }
-  deleteBook(id: string): Book {
-    const deleteBook = this.books.find((book) => book.id === id);
-    this.books = this.books.filter((book) => book.id !== id);
+  async deleteBook(id: string): Promise<{ bookId: string; message: string }> {
+    await this.prisma.book.delete({ where: { id } });
 
-    return deleteBook;
+    return { bookId: id, message: 'Book deleted' };
   }
-  updateBook(id: string, partialBook: Partial<Book>): Book {
-    const bookById = this.getBookById(id);
-    const updatedBook = { ...bookById, ...partialBook };
-    this.books = this.books.map((book) =>
-      book.id === bookById.id ? updatedBook : book,
-    );
+  async updateBook(id: string, partialBook: UpdateBookDto): Promise<Book> {
+    await this.prisma.book.update({
+      where: {
+        id,
+      },
+      data: {
+        ...partialBook,
+      },
+    });
 
-    return updatedBook;
+    return this.getBookById(id);
   }
 }
