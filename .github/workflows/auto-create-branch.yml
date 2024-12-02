@@ -15,9 +15,9 @@ jobs:
             
       - name: Create branch
         run: |
-          ISSUE_NUMBER=${{ github.event.issue.number }}
-          ISSUE_TITLE=${{ github.event.issue.title }}
-          LOWER_TITLE=$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]')
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          LOWER_TITLE=$(echo $ISSUE_TITLE | tr '[:upper:]' '[:lower:]')
           if [[ "$LOWER_TITLE" == *fix* ]]; then
               BRANCH_NAME="fix-issue-${ISSUE_NUMBER}"
           elif [[ "$LOWER_TITLE" == *feature* ]]; then
