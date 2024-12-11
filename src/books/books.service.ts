@@ -1,41 +1,51 @@
-import { Injectable } from '@nestjs/common';
+import { CreateBookDto } from './dto/create-book.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Book } from './books.model';
 import { v4 } from 'uuid';
+import { FirebaseService } from 'src/firebase/firebase.service';
+import { UpdateBookDto } from './dto/update-book.dto';
+import { FieldValue } from 'firebase-admin/firestore';
 
 @Injectable()
 export class BooksService {
-  books: Book[] = [];
-  getAllBooks(): Book[] {
-    return this.books;
-  }
-  createBook(title: string, description: string, author: string): Book {
-    const book: Book = {
-      title,
-      description,
-      id: v4(),
-      author,
-    };
+  constructor(private firebaseService: FirebaseService) {}
+  async getAllBooks(): Promise<Book[]> {
+    const data = await this.firebaseService.bookCollection.get();
+    const books: Book[] = [];
+    data.forEach((doc) => {
+      const book = doc.data() as Book;
+      books.push(book);
+    });
 
-    this.books.push(book);
-
-    return book;
+    return books;
   }
-  getBookById(id: string): Book {
-    return this.books.find((book) => book.id === id);
-  }
-  deleteBook(id: string): Book {
-    const deleteBook = this.books.find((book) => book.id === id);
-    this.books = this.books.filter((book) => book.id !== id);
+  async createBook(book: CreateBookDto): Promise<Book> {
+    const newId = v4();
+    await this.firebaseService.bookCollection
+      .doc(newId)
+      .set({ ...book, id: newId });
 
-    return deleteBook;
+    return this.getBookById(newId);
   }
-  updateBook(id: string, partialBook: Partial<Book>): Book {
-    const bookById = this.getBookById(id);
-    const updatedBook = { ...bookById, ...partialBook };
-    this.books = this.books.map((book) =>
-      book.id === bookById.id ? updatedBook : book,
-    );
+  async getBookById(id: string): Promise<Book> {
+    const doc = await this.firebaseService.bookCollection.doc(id).get();
 
-    return updatedBook;
+    if (doc.exists) {
+      return doc.data() as Book;
+    } else {
+      throw new NotFoundException(`Book with Id: ${id} not found`);
+    }
+  }
+  async deleteBook(id: string): Promise<{ bookId: string; message: string }> {
+    await this.firebaseService.bookCollection.doc(id).delete();
+
+    return { bookId: id, message: 'Book deleted' };
+  }
+  async updateBook(id: string, partialBook: UpdateBookDto): Promise<Book> {
+    await this.firebaseService.bookCollection
+      .doc(id)
+      .update({ ...partialBook, updated_at: FieldValue.serverTimestamp() });
+
+    return this.getBookById(id);
   }
 }
