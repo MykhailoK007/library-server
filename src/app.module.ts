@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { BooksModule } from './books/books.module';
-import { FirebaseModule } from './firebase/firebase.module';
 import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from './prisma/prisma.module';
+
 
 @Module({
   imports: [
     BooksModule,
-    FirebaseModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
   ],
 })
 export class AppModule {}

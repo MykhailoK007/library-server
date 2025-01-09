@@ -1,4 +1,5 @@
-import { IsDate, IsNotEmpty, IsInt, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsInt, MaxLength } from 'class-validator';
+
 export class CreateBookDto {
   @IsNotEmpty()
   @MaxLength(100, {
@@ -18,7 +19,6 @@ export class CreateBookDto {
   description: string;
 
   @IsNotEmpty()
-  @IsDate()
   publishDate: string;
 
   @IsNotEmpty()
