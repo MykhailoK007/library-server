@@ -18,6 +18,7 @@ export class BooksService {
     return createdBook;
   }
   async getBookById(id: string): Promise<Book> {
+    //TODO: Fix prisma unhandled error
     const book = await this.prisma.book.findUnique({
       where: {
         id,
