@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsInt, MaxLength } from 'class-validator';
+
 export class CreateBookDto {
   @IsNotEmpty()
   @MaxLength(100, {
