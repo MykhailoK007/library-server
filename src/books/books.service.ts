@@ -28,7 +28,7 @@ export class BooksService {
       throw new NotFoundException(`Book with Id: ${id} not found`);
     }
 
-    return this.getBookById(newId);
+    return book;
   }
   async deleteBook(id: string): Promise<{ bookId: string; message: string }> {
     await this.prisma.book.delete({ where: { id } });
@@ -36,7 +36,7 @@ export class BooksService {
     return { bookId: id, message: 'Book deleted' };
   }
   async updateBook(id: string, partialBook: UpdateBookDto): Promise<Book> {
-    await this.prisma.book.update({
+    const book = await this.prisma.book.update({
       where: {
         id,
       },
@@ -45,7 +45,6 @@ export class BooksService {
       },
     });
 
-
-    return this.getBookById(id);
+    return book;
   }
 }
